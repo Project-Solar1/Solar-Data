@@ -1,0 +1,958 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Code</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+    <meta name="description" content="Your description">
+    <meta name="keywords" content="Your keywords">
+    <meta name="author" content="Your name">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/preview.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css">
+    <script src="js/include_script.js"></script>
+    <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <link href="css/ie.css" rel="stylesheet">
+    <![endif]-->
+    <style>
+        /* Style for code snippets */
+        .code-snippet {
+            background-color: #ff9933; /* Darker orange background color */
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px; /* Increased padding */
+            margin-bottom: 20px; /* Increased margin */
+            position: relative; /* Added position */
+        }
+        .code-snippet pre {
+            margin: 0;
+            padding: 0;
+            white-space: pre-wrap;
+            overflow-y: auto; /* Enable vertical scrollbar if needed */
+        }
+        .copy-button {
+            position: absolute; /* Added position */
+            top: 10px; /* Adjusted top position */
+            left: 10px; /* Adjusted left position */
+            cursor: pointer;
+            background-color: #0366d6;
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        .connection-explanation pre {
+            max-height: 200px; /* Reduced maximum height */
+            overflow-y: auto; /* Enable vertical scrollbar if needed */
+            font-size: 10px; /* Reduced font size */
+        }
+        .example-2 pre {
+            max-height: 400px; /* Increased maximum height */
+            overflow-y: auto; /* Enable vertical scrollbar if needed */
+            font-size: 14px; /* Increased font size */
+        }
+    </style>
+</head>
+<body>
+    <!--content wrapper-->
+    <div id="wrapper">
+        <section class="container">
+            <div class="dynamicContent">
+                <!--content-->
+                <div class="inner">
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2">
+                            <h1 class="text-center mb-5">Code</h1>
+                            <!-- Connection Explanation -->
+                            <div class="code-snippet connection-explanation">
+                                <h3>Connection Explanation</h3>
+                                <div class="copy-button" onclick="copyToClipboard('connection-explanation')">
+                                    Copy
+                                </div>
+
+                                <pre>
+
+ HC05 Bluetooth module
+ pin1 : KEY   N.C
+ pin2 : VCC   to Vcc +5V
+ pin3 : GND   to GND
+ pin4 : TXD   to NUC140 UART0-RX (GPB0)
+ pin5 : RXD   to NUC140 UART0-TX (GPB1)
+ pin6 : STATE N.C.
+
+ Horizontal Axis - top servo
+ pin1 : signal to PWM0/GPA12 (NUC140-pin65/NUC120-pin28)
+ pin2 : Vcc
+ pin3 : Gnd
+
+ Vertical Axis
+ pin1 : signal to PWM1/GPA13 (NUC140-pin64/NUC120-pin27)
+ pin2 : Vcc
+ pin3 : Gnd
+
+ ldr1 : GPA0 (ADC4)
+ ldr2 : GPA1 (ADC1)
+ ldr3 : GPA2 (ADC2)
+ ldr4 : GPA3 (ADC3)
+
+RELAY1 : GPA8
+RELAY2 : GPA9
+
+current : ADC0
+voltage : GPA6
+
+ RC522 RFID Reader
+ SDA (SS) : connected to GPC8 (SPI1_SS)
+ SCK (SCK) : connected to GPC9 (SPI1_CLK)
+ MOSI : connected to GPC11(SPI1_MOSI)
+ MISO : connected to GPC10(SPI1_MISO)
+ IRQ : no connection
+ GND : connected to Gnd
+ RST : connected to 3.3V / no connection
+ VCC : connected to 3.3V
+
+
+                            </div>
+                            <!-- Example 2 -->
+                            <div class="code-snippet example-2">
+                                <h3>Full code and explain</h3>
+                                <div class="copy-button" onclick="copyToClipboard('example-2')">
+                                    Copy
+                                </div>
+                                <pre><code class="language-c">
+
+                                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;math.h&gt;
+#include &lt;stdbool.h&gt;
+#include "DrvSYS.h" 
+#include "DrvGPIO.h" 
+#include "DrvADC.h"
+#include "Driver\DrvSPI.h"
+#include "Driver\DrvUART.h"
+#include "ScanKey.h"
+#include "SPI_RC522.h"
+#include "NUC1xx.h"
+#include "LCD_Driver.h"
+#include "Driver_PWM_Servo.h"
+#include "NUC1xx.h"
+#include "NUC1xx-LB_002\LCD_Driver.h"
+
+
+// Definitions 
+
+//UART TX LEN
+#define TX_BUFFER_LEN 64
+//UART Rx LEN
+#define RX_BUFFER_LEN 7
+
+//ADC 
+#define ADC_RESOLUTION 4095.0 // 12-bit ADC
+#define VOLTAGE_MULTIPLIER 37 // Multiplier to scale Volt From Battery
+#define FULL_BATTERY_VOLTAGE 4.2
+#define EMPTY_BATTERY_VOLTAGE 3.0
+#define NUM_SAMPLES 20 // Number of samples for Adc Volt && Current 
+#define SENSITIVITY 0.185 //Sensitivity Of The Current Amper Moudle
+
+
+//Servo Range H and V 
+#define HITIME_MIN_X 64 
+#define HITIME_MAX_X 120
+#define HITIME_MIN_Y 60
+#define HITIME_MAX_Y 90
+#define  CAM_H_AXIS 0
+#define  CAM_V_AXIS 1
+
+#define COST_PER_MAH 0.05 //Cost For MAh
+
+
+
+// Function prototypes
+void initSystem();
+void handleUartInterrupt();
+void calculateCurrentAndCost();
+void calibrateOffset();
+void initSPI();
+int readRFIDTag();
+void adjustHitime(uint16_t ldr1, uint16_t ldr2, uint16_t ldr3, uint16_t ldr4);
+void postChargeCleanup();
+void timeBasedCharge();
+void moneyBasedCharge();
+void checkBatteryVoltage();
+void checkRfidTag();
+void checkRelay();
+void ledAndBuzzerControl();
+void ldrAndServoControl();
+void sensorCheckMenu();
+void uartMenuControl();
+
+
+// Global variables
+static float offset = 0.0,offsetBattery=0.0; //current&&Voltage Offset Relay Open
+int x_hitime=92, y_hitime=75,anglex=0,angley=0; //Servo Starting Position && Interupt Change Position 
+bool isStable = false,firstUse=false; //stable ADC Value
+volatile int check=0,stop=0,chargingTime = -1,chargingMoney = -1,logoutCommandReceived = 0;
+float averageCurrent, cost;
+
+//Rfid Tag
+unsigned char RF_Buffer[18];
+volatile int BtDevice = 0, AcessAdmin = 0,confirmInput = 0;
+unsigned char UID[4], Temp[4];
+unsigned char Password_Buffer[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+char card[4] = {0x62, 0xBC, 0xED, 0x51};
+
+//Uart Tx Buffer &Rx
+char TxBuffer[TX_BUFFER_LEN]; 
+char RxBuffer[RX_BUFFER_LEN]; 
+volatile uint8_t comRbytes = 0; //location in The Rx Arr
+
+
+
+void UART_INT_HANDLE(void) {
+    while (UART0->ISR.RDA_IF == 1) {
+        uint8_t data = UART0->DATA;
+        if (!check) {
+            BtDevice = 1;
+            check = 1;
+        }
+
+        if (data != '\n' && comRbytes < sizeof(RxBuffer) - 1) {
+            RxBuffer[comRbytes++] = data;
+        }
+
+        if (data == '\n' || comRbytes >= sizeof(RxBuffer) - 1) {
+            RxBuffer[comRbytes] = '\0';
+
+            if (comRbytes > 0) {
+                if (strncmp((const char *)RxBuffer, "SX", 2) == 0) {
+                    anglex = atoi((const char *)RxBuffer + 2);
+                    if (anglex >= 100) anglex /= 10;
+                    PWM_Servo(CAM_H_AXIS, anglex + 50);
+                } else if (strncmp((const char *)RxBuffer, "SY", 2) == 0) {
+                    angley = atoi((const char *)RxBuffer + 2);
+                    if (angley >= 100) angley /= 10;
+                    PWM_Servo(CAM_V_AXIS, angley + 50);
+                }
+
+                if (strstr((const char *)RxBuffer, "PASS_O") != NULL) {
+                    DrvGPIO_ClrBit(E_GPB, 11);
+                    DrvSYS_Delay(700000);
+                    DrvGPIO_SetBit(E_GPB, 11);
+                    AcessAdmin = 1;
+                    DrvGPIO_SetBit(E_GPA, 10);
+                    DrvGPIO_ClrBit(E_GPA, 11);
+                } else if (strstr((const char *)RxBuffer, "LOGO##") != NULL) {
+                    AcessAdmin = 0;
+                    stop = 1;
+                    DrvGPIO_ClrBit(E_GPB, 11);
+                    DrvSYS_Delay(700000);
+                    DrvGPIO_SetBit(E_GPB, 11);
+                    DrvGPIO_SetBit(E_GPA, 11);
+                    DrvGPIO_ClrBit(E_GPA, 10);
+                } else if (strstr((const char *)RxBuffer, "BAC##") != NULL) {
+                    stop = 1;
+                    DrvGPIO_ClrBit(E_GPB, 11);
+                    DrvSYS_Delay(100000);
+                    DrvGPIO_SetBit(E_GPB, 11);
+                } else if (strncmp((const char *)RxBuffer, "SMT", 3) == 0) {
+                    chargingTime = (RxBuffer[3] - '0') * 10 + (RxBuffer[4] - '0');
+                } else if (strncmp((const char *)RxBuffer, "SMN", 3) == 0) {
+                    chargingMoney = (RxBuffer[3] - '0') * 100 + (RxBuffer[4] - '0') * 10 + (RxBuffer[5] - '0');
+                } else if (RxBuffer[0] >= '0' && RxBuffer[0] <= '9' && strlen((const char *)RxBuffer) == 1) {
+                    confirmInput = RxBuffer[0] - '0';
+                }
+            }
+            comRbytes = 0;
+            memset(RxBuffer, 0, sizeof(RxBuffer));
+        }
+    }
+}
+
+
+void getCurrentAndCost() {
+    static int stableCurrentCount = 0,unstableCurrentCount=0;
+    uint16_t readValue,i;
+        float rawVoltage, current, totalCurrent = 0;
+        const int stabilityThreshold = 3,sampleCount = 10;
+    // Take multiple readings and average them
+    for (i = 0; i < sampleCount; i++) {
+        DrvADC_StartConvert();
+        while (DrvADC_IsConversionDone() == FALSE);
+        readValue = ADC->ADDR[0].RSLT & 0xFFF;
+        rawVoltage = (float)readValue * 3.3 * 2 / 4095 * 1.035;
+        current = (rawVoltage - 2.5) / SENSITIVITY ;
+            current-=offset;
+        totalCurrent += current;
+        DrvSYS_Delay(10000); // Short delay between readings
+    }
+    // Calculate the average current from all samples
+    averageCurrent = totalCurrent / sampleCount;
+    // Determine if the current is stable
+        
+    if (fabs(averageCurrent) > 0.01) {
+        stableCurrentCount++;
+        unstableCurrentCount = 0;
+    } else {
+        unstableCurrentCount++;
+        stableCurrentCount = 0;
+    }
+    if (stableCurrentCount > stabilityThreshold) {
+        isStable = true;
+        stableCurrentCount = 0;
+    } else if (unstableCurrentCount > stabilityThreshold) {
+        isStable = false;
+        unstableCurrentCount = 0;
+    }
+    // Offset correction for averageCurrent
+    averageCurrent = fabs(averageCurrent);
+if(    averageCurrent<0.2)
+    averageCurrent=0;
+      if(averageCurrent>0.1)
+            {
+    if (isStable) {
+            if(averageCurrent<1)
+        cost += (averageCurrent * COST_PER_MAH);
+    }
+    }
+}
+void captureOffset() {
+    uint16_t readValue,i;
+    float rawVoltage, current, totalOffset = 0;
+    for ( i = 0; i < NUM_SAMPLES; i++) {
+        DrvADC_StartConvert();
+        while (DrvADC_IsConversionDone() == FALSE);
+        readValue = ADC->ADDR[0].RSLT & 0xFFF;
+        rawVoltage = (float)readValue * 3.3 * 2 / 4095 * 1.035;
+        current = (rawVoltage - 2.5) / SENSITIVITY;
+        totalOffset += current;
+        DrvSYS_Delay(100000);
+    }
+    offset = totalOffset / NUM_SAMPLES;
+}
+
+void Init_SPI() {
+    DrvSPI_Open(eDRVSPI_PORT1, eDRVSPI_MASTER, eDRVSPI_TYPE1, 8);
+    DrvSPI_SetEndian(eDRVSPI_PORT1, eDRVSPI_MSB_FIRST);
+    DrvSPI_DisableAutoSS(eDRVSPI_PORT1);
+    DrvSPI_SetClockFreq(eDRVSPI_PORT1, 50000, 0); // Set SPI clock to 50KHz
+}
+
+int ReadRFIDandDisplay() {
+    unsigned char status;
+    bool cardChecked = false;
+     //Buzzer 
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    // check the card until verified
+    while (!cardChecked) {
+        // Exit if Admin Access Is Detected
+        if (AcessAdmin == 1) {
+            return 1;
+        }
+        // Request for RFID card presence
+        status = PcdRequest(0x52, Temp);
+        if (status == MI_OK) {
+            // Attempt to read the card's UID
+            status = PcdAnticoll(UID);
+            if (status == MI_OK) {
+                if (memcmp(UID, card, 4) == 0) {
+                    // Card valid
+                    sprintf(TxBuffer, "RFID_OK!\n");
+                    DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+                    memset(TxBuffer, 0, sizeof(TxBuffer));
+                    return 1;
+                } else {
+                    // Card   invalid
+                    sprintf(TxBuffer, "Invalid Card UID: %X %X %X %X \n", UID[0], UID[1], UID[2], UID[3]);
+                    DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+                    memset(TxBuffer, 0, sizeof(TxBuffer));
+                    return 0;
+                }
+            }
+        } else {
+            DrvSYS_Delay(1200000);
+        }
+    }
+    return 0; 
+}
+
+void adjustHitimeBasedOnLdrValues(uint16_t ldr1, uint16_t ldr2, uint16_t ldr3, uint16_t ldr4) {
+    if ((ldr1 - ldr4) > 500) x_hitime--;
+    else if ((ldr4 - ldr1) > 500) x_hitime++;
+
+    if ((ldr3 - ldr2) > 500) y_hitime--;
+    else if ((ldr2 - ldr3) > 500) y_hitime++;
+
+    if (x_hitime < HITIME_MIN_X) x_hitime = HITIME_MIN_X;
+    else if (x_hitime > HITIME_MAX_X) x_hitime = HITIME_MAX_X;
+
+    if (y_hitime < HITIME_MIN_Y) y_hitime = HITIME_MIN_Y;
+    else if (y_hitime > HITIME_MAX_Y) y_hitime = HITIME_MAX_Y;
+}
+
+void cleanupPostCharging() {
+    memset(TxBuffer, 0, sizeof(TxBuffer));
+    DrvGPIO_ClrBit(E_GPA, 8); //Relay off
+    DrvGPIO_SetBit(E_GPA, 11); //Buzzer On
+	   DrvSYS_Delay(100000); //Short Delay
+    DrvGPIO_ClrBit(E_GPA, 10); ////Buzzer Off
+    cost = 0;
+    AcessAdmin = 0;
+    stop = 1;
+}
+
+
+void timeBasedCharge() {
+    uint16_t ldr1, ldr2, ldr3, ldr4; 
+    int time = 0, totalSeconds;
+
+	   //Buzzer Short trigger
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    // Wait To Insert Charging Time Or Back Menu
+    while (chargingTime == -1) {
+        DrvSYS_Delay(1000000);
+        if (stop > 0) {
+            stop--;
+            return;
+        }
+    }
+    // Current Moudle Offset Relay When Close
+    captureOffset();
+    DrvSYS_Delay(10000);
+    time = chargingTime;
+    chargingTime = -1;
+    cost = 0;
+
+    // Set Relay To On for charging
+    DrvGPIO_SetBit(E_GPA, 8);
+
+    // Charging loop setup
+    totalSeconds = time * 60;
+    DrvSYS_Delay(12000000);
+
+    while (totalSeconds > 0) {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+
+        getCurrentAndCost();
+
+        // Handle different states based on current readings
+        if (averageCurrent > 1) {
+            sprintf(TxBuffer, "\n\nError\n\n\nCheck The Wires.\n\n\nCost: %.2f ILS.\n\n\nTime left: %02d:%02d. \r", cost, minutes, seconds);
+        } else if (isStable && averageCurrent > 0.1) {
+            sprintf(TxBuffer, "\n\nInterrupt Off\n\n\nAmper: %.2fA\n\n\nCost: %.2f ILS\n\n\nTime Left: %02d:%02d.\n\n\nEnjoy your charge.\r", averageCurrent, cost, minutes, seconds);
+        } else if (averageCurrent < 0.1) {
+            sprintf(TxBuffer, "\n\nError\n\n\nVerify charger link.\n\n\nCheck supply Battery.\n\n\nCost: %.2f ILS.\n\n\nTime left: %02d:%02d. \r", cost, minutes, seconds);
+        }
+
+        // Write to UART and handle ADC conversion
+        DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+        memset(TxBuffer, 0, sizeof(TxBuffer));
+        DrvADC_StartConvert();
+        while (DrvADC_IsConversionDone() == FALSE);
+
+        // Read LDR values and adjust hitime
+        ldr1 = ADC->ADDR[1].RSLT & 0xFFF;
+        ldr2 = ADC->ADDR[2].RSLT & 0xFFF;
+        ldr3 = ADC->ADDR[3].RSLT & 0xFFF;
+        ldr4 = ADC->ADDR[4].RSLT & 0xFFF;
+				 
+				//Short Delay For Adc Reading
+				 DrvSYS_Delay(100000);
+
+        adjustHitimeBasedOnLdrValues(ldr1, ldr2, ldr3, ldr4);
+
+        // Update PWM servos According to  hitime 
+        PWM_Servo(CAM_H_AXIS, x_hitime);
+        PWM_Servo(CAM_V_AXIS, y_hitime);
+        
+        // Delay and decrement total seconds
+        DrvSYS_Delay(2050000); 
+        totalSeconds--;
+    }
+
+    // Finish Charging
+    sprintf(TxBuffer, "Charging Complete.<br>Cost: %.2f ILS.<br>Auto-logout for security.<br><br>Thank you.!", cost);
+    DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+    cleanupPostCharging();
+}
+
+
+
+void moneyBasedCharge() {
+    int targetMoney = 0;
+    float currentMoney = 0;
+    uint16_t ldr1, ldr2, ldr3, ldr4;
+
+    // Buzzer
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    // Wait for charging money input or Prev Menu
+    while (chargingMoney == -1) {
+        DrvSYS_Delay(1000000);
+        if (stop > 0) {
+            stop--;
+            return;
+        }
+    }
+
+    // Capture initial offset off Current Relay Open
+    captureOffset();
+    DrvSYS_Delay(100000);
+    targetMoney = chargingMoney;
+    chargingMoney = -1;
+    cost = 0;
+
+    // Activate the charging relay
+    DrvGPIO_SetBit(E_GPA, 8);
+
+    while (currentMoney < targetMoney) {
+        getCurrentAndCost();
+        currentMoney = cost;
+
+        // Check and handle different current conditions
+        if (averageCurrent > 0.75) {
+            sprintf(TxBuffer, "\n\nError\n\n\nCheck The Wires.\n\n\nof The Amper Moudle.\n\n\nCost: %.2f ILS.\n\n\nMoney Left: %.2f ILS. \r", cost, targetMoney - currentMoney);
+        } else if (isStable && averageCurrent > 0.1) {
+            sprintf(TxBuffer, "\n\nInterrupt Off\n\n\nAmper: %.2fA\n\n\nCost: %.2f ILS\n\n\nMoney Left: %.2f ILS.\r", averageCurrent, cost, targetMoney - currentMoney);
+        } else if (averageCurrent < 0.1) {
+            sprintf(TxBuffer, "\n\nError\n\n\nCheck charger connection To Phone.\n\n\nCheck supply Battery.\n\n\nCost: %.2f ILS.\n\n\nMoney Left: %.2f ILS. \r", cost, targetMoney - currentMoney);
+        }
+
+        // Update the display via UART
+        DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+        memset(TxBuffer, 0, sizeof(TxBuffer));
+
+        // Read LDR values, adjust hitime, and update servos just like in timeBasedCharge
+        DrvADC_StartConvert();
+        while (DrvADC_IsConversionDone() == FALSE);
+        ldr1 = ADC->ADDR[1].RSLT & 0xFFF;
+        ldr2 = ADC->ADDR[2].RSLT & 0xFFF;
+        ldr3 = ADC->ADDR[3].RSLT & 0xFFF;
+        ldr4 = ADC->ADDR[4].RSLT & 0xFFF;
+							
+				//Short Delay For Adc Reading
+				 DrvSYS_Delay(100000);
+
+        adjustHitimeBasedOnLdrValues(ldr1, ldr2, ldr3, ldr4);
+				
+        PWM_Servo(CAM_H_AXIS, x_hitime);
+        PWM_Servo(CAM_V_AXIS, y_hitime);
+
+        DrvSYS_Delay(2050000); // Maintain a consistent delay
+    }
+
+    // Post charging process: display message and reset system
+    sprintf(TxBuffer, "Charging Complete.<br>Cost: %.2f ILS.<br>Auto-logout for security.<br><br>Thank you.!", cost);
+    DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+    memset(TxBuffer, 0, sizeof(TxBuffer));
+    cleanupPostCharging();
+	}
+
+
+void OffsetCalibration(void) {
+    uint16_t readValue,i;
+    float voltage, sumVoltage = 0;
+    DrvGPIO_ClrBit(E_GPA, 9); //Realy Battery Off to Take Offset
+    DrvSYS_Delay(500000);
+    for (i = 0; i < NUM_SAMPLES; i++) {
+        DrvADC_StartConvert();
+        while (!DrvADC_IsConversionDone());
+        readValue = ADC->ADDR[6].RSLT & 0xFFF;
+        voltage = (float)readValue / ADC_RESOLUTION * VOLTAGE_MULTIPLIER;
+        sumVoltage += voltage;
+        DrvSYS_Delay(200000);
+    }
+    offsetBattery = sumVoltage / NUM_SAMPLES;
+    DrvGPIO_SetBit(E_GPA, 9); //Realy Battery On
+}
+
+void BatteryCheckVoltage(void) {
+    uint16_t readValue,i;
+    float voltage, averageVoltage, batteryPercentage,sumVoltage=0;
+    char sign[4] = "";
+   
+	  //Buzzer
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    while(1) { //Infinite Loop Until Previous Menu
+        OffsetCalibration();
+        DrvSYS_Delay(100000);
+        for (i = 0; i < NUM_SAMPLES; i++) {
+            DrvADC_StartConvert();
+            while (DrvADC_IsConversionDone() == FALSE);
+            readValue = ADC->ADDR[6].RSLT & 0xFFF;
+            voltage = (float)readValue / ADC_RESOLUTION * VOLTAGE_MULTIPLIER;
+            sumVoltage += voltage;
+            DrvSYS_Delay(30000);
+        }
+
+        averageVoltage = (sumVoltage / NUM_SAMPLES) - offsetBattery - 0.11;
+        batteryPercentage = (averageVoltage - EMPTY_BATTERY_VOLTAGE) / (FULL_BATTERY_VOLTAGE - EMPTY_BATTERY_VOLTAGE) * 100;
+        batteryPercentage = batteryPercentage < 0 ? 0 : (batteryPercentage > 100 ? 100 : batteryPercentage);
+
+        if (averageVoltage > 4.35 || averageVoltage < 3) {
+            strcpy(sign, "!!!");
+            sprintf(TxBuffer, "Check wires or battery connection error. %s\r", sign);
+        } else {
+            sign[0] = '\0'; 
+            if (batteryPercentage > 80) strcpy(sign, "!");
+            else if (batteryPercentage > 50) strcpy(sign, "!!");
+            else strcpy(sign, "!!!");
+            sprintf(TxBuffer, "Voltage: %.2f V, Percent: %.1f%% %s\r", averageVoltage, batteryPercentage, sign);
+        }
+
+        DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+        memset(TxBuffer, 0, sizeof(TxBuffer));
+        DrvSYS_Delay(300000);
+
+        if (stop > 0) { //Back To Menu
+            stop--;
+            return;
+        }
+    }
+}
+
+
+void RfidTagCheck() {
+    unsigned char status;
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    while (1) { // Infinite loop Until Back To Prev Menu
+        status = PcdRequest(0x52, Temp);
+        if (status == MI_OK) {
+            status = PcdAnticoll(UID);
+            if (status == MI_OK) {
+                sprintf(TxBuffer, "UID: %X %X %X %X\n", UID[0], UID[1], UID[2], UID[3]);
+                DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+                memset(TxBuffer, 0, sizeof(TxBuffer));
+            }
+        } else {
+            DrvSYS_Delay(1200000);
+        }
+
+        if (stop > 0) {
+            stop--;
+            break;
+        }
+    }
+}
+
+void RelyCheck() {
+    confirmInput = 0;
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    while (1) {
+        if (confirmInput == 1) { //Current Relay On
+            DrvGPIO_SetBit(E_GPA, 8);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 2) {//Current Relay Off
+            DrvGPIO_ClrBit(E_GPA, 8);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 3) {//Voltage Relay On
+            DrvGPIO_SetBit(E_GPA, 9);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 4) {//Voltage Relay Off
+            DrvGPIO_ClrBit(E_GPA, 9);
+            confirmInput = 0;
+        }
+
+        DrvSYS_Delay(6000000);
+
+        if (stop > 0) {
+            stop--;
+            confirmInput = 0;
+            DrvGPIO_ClrBit(E_GPA, 8); //Relay Current Off
+            DrvGPIO_ClrBit(E_GPA, 9); //Relay Voltage Off
+            return;
+        }
+    }
+}
+
+void LedAndBuzzer() {
+    confirmInput = 0;
+	//Buzzer
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+    DrvGPIO_ClrBit(E_GPA, 11);//Red Led Off
+    DrvGPIO_ClrBit(E_GPA, 10);//Green Led Off
+
+    while (1) {
+        if (confirmInput == 1) {//Red Led On
+            DrvGPIO_SetBit(E_GPA, 11);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 2) {//Red Led Off
+            DrvGPIO_ClrBit(E_GPA, 11);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 3) {//Green Led On
+            DrvGPIO_SetBit(E_GPA, 10);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 4) {//Green Led Off
+            DrvGPIO_ClrBit(E_GPA, 10);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 5) { //Buzzer Off
+            DrvGPIO_ClrBit(E_GPB, 11);
+            confirmInput = 0;
+        }
+
+        if (confirmInput == 6) { //Buzzer ON
+            DrvGPIO_SetBit(E_GPB, 11);
+            confirmInput = 0;
+        }
+
+        DrvSYS_Delay(60000);
+
+        if (stop > 0) {
+            stop--;
+            confirmInput = 0;
+            DrvGPIO_SetBit(E_GPA, 10);
+            DrvGPIO_ClrBit(E_GPA, 11);
+            return;
+        }
+    }
+}
+
+void LdrAndServo() {
+    uint16_t ldr1, ldr2, ldr3, ldr4;
+	//Buzzer
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+
+    while (1) {
+        DrvADC_StartConvert();
+        while (DrvADC_IsConversionDone() == FALSE);
+        ldr1 = ADC->ADDR[1].RSLT & 0xFFF;
+        ldr2 = ADC->ADDR[2].RSLT & 0xFFF;
+        ldr3 = ADC->ADDR[3].RSLT & 0xFFF;
+        ldr4 = ADC->ADDR[4].RSLT & 0xFFF;
+        DrvSYS_Delay(100000);
+        sprintf(TxBuffer, "LDR1:%d,LDR2:%d,LDR3:%d,LDR4:%d\n", ldr1, ldr2, ldr3, ldr4);
+        DrvUART_Write(UART_PORT0, (uint8_t *)TxBuffer, strlen(TxBuffer) + 1);
+        memset((void *)RxBuffer, 0, sizeof(RxBuffer));
+        DrvSYS_Delay(2050000);
+
+        if (stop > 0) {
+            stop--;
+            PWM_Servo(CAM_H_AXIS, 87);  
+            PWM_Servo(CAM_V_AXIS, 68);
+            return;
+        }
+    }
+}
+
+void sensorCheck() {
+	//Buzzer
+    DrvGPIO_ClrBit(E_GPB, 11);
+    DrvSYS_Delay(100000);
+    DrvGPIO_SetBit(E_GPB, 11);
+    while (stop == 0) {
+        confirmInput = 0;
+        while (confirmInput == 0) {
+            if (stop > 0) {
+                stop--;
+                return;
+            }
+        }
+        switch (confirmInput) {
+            case 1:
+                RfidTagCheck();
+                break;
+            case 2:
+                LdrAndServo();
+                break;
+            case 3:
+                RelyCheck();
+                break;
+            case 4:
+                LedAndBuzzer();
+                break;
+            default:
+                break;
+        }
+        confirmInput = 0;
+    }
+}
+
+
+void uartControlledMenu() {
+    confirmInput = 0;
+    while (1) {
+        while (confirmInput == 0) {
+            if (stop > 0) {
+                stop--;
+                return;
+            }
+        }
+        switch (confirmInput) {
+            case 1:
+                timeBasedCharge();
+                break;
+            case 2:
+                moneyBasedCharge();
+                break;
+            case 3:
+                sensorCheck();
+                break;
+                        case 4:
+                BatteryCheckVoltage();
+                break;
+            default:
+                break;
+        }
+        confirmInput = 0;
+    }
+}
+
+
+
+
+void DRVinit() {
+    // Initialize GPIOs for interrupt handling
+    DrvGPIO_Open(E_GPA, 15, E_IO_INPUT);
+    DrvGPIO_Open(E_GPB, 15, E_IO_INPUT);
+    DrvGPIO_EnableInt(E_GPA, 15, E_IO_RISING, E_MODE_EDGE);
+    DrvGPIO_EnableInt(E_GPB, 15, E_IO_RISING, E_MODE_EDGE);
+    DrvGPIO_SetDebounceTime(5, E_DBCLKSRC_10K);
+            DrvGPIO_Open(E_GPA, 11, E_IO_OUTPUT);//Red Led
+        DrvGPIO_Open(E_GPA, 10, E_IO_OUTPUT);//Green Led
+    DrvGPIO_Open(E_GPB, 11, E_IO_OUTPUT); // initial GPIO pin GPB11 for controlling Buzzer
+    DrvGPIO_EnableDebounce(E_GPA, 15);
+    DrvGPIO_EnableDebounce(E_GPB, 15);
+    DrvGPIO_Open(E_GPB, 15, E_IO_INPUT);
+        DrvGPIO_Open(E_GPA, 8, E_IO_OUTPUT);
+    DrvGPIO_ClrBit(E_GPA, 8); // Set initial state to LOW
+    DrvGPIO_Open(E_GPA, 9, E_IO_OUTPUT);
+    DrvGPIO_ClrBit(E_GPA, 9); // Set initial state to LOW
+        DrvGPIO_SetBit(E_GPA, 9); // Set initial state to LOW
+
+    DrvADC_Open(ADC_SINGLE_END, ADC_SINGLE_CYCLE_OP, 0x5F, INTERNAL_HCLK, 1); // ADC0 - ADC6
+}
+
+
+int32_t main(void) {
+    STR_UART_T sParam;
+    UNLOCKREG();
+    // Clock Configuration
+    SYSCLK->PWRCON.XTL12M_EN = 1;
+    DrvSYS_Delay(5000);
+    SYSCLK->CLKSEL0.HCLK_S = 0;
+    DrvSYS_SetOscCtrl(E_SYS_XTL12M, 1); // Enable the 12MHz oscillator oscillation
+    DrvSYS_SelectHCLKSource(0); // HCLK clock source. 0: external 12MHz; 4:internal 22MHz RC oscillator
+    DrvSYS_SetClockDivider(E_SYS_HCLK_DIV, 0); /* HCLK clock frequency = HCLK clock source / (HCLK_N + 1) */
+    // GPIO Initialization for SPI
+    DrvGPIO_InitFunction(E_FUNC_SPI1);
+
+    /* UART Setting */
+    sParam.u32BaudRate           = 9600;
+    sParam.u8cDataBits           = DRVUART_DATABITS_8;
+    sParam.u8cStopBits           = DRVUART_STOPBITS_1;
+    sParam.u8cParity             = DRVUART_PARITY_NONE;
+    sParam.u8cRxTriggerLevel= DRVUART_FIFO_1BYTES;
+    // Set UART Configuration
+     if(DrvUART_Open(UART_PORT0,&sParam) != E_SUCCESS);
+    DrvUART_EnableInt(UART_PORT0, DRVUART_RDAINT, (void*)UART_INT_HANDLE);
+    // GPIO Initialization for Interrupt Handling
+    DRVinit();
+    // SPI Initialization
+    Init_SPI();
+    LOCKREG();
+    Initial_panel();
+    PcdReset();
+    PcdAntennaOn();
+    DrvGPIO_InitFunction(E_FUNC_UART0);    // Set UART pins
+        //servo to start state
+    InitPWM(CAM_H_AXIS);    // initialize PWM for Horizontal Axis
+    InitPWM(CAM_V_AXIS);   // initialize PWM for Vertical Axis
+    PWM_Servo(CAM_H_AXIS, x_hitime);
+    PWM_Servo(CAM_V_AXIS, y_hitime);
+
+        DrvGPIO_SetBit(E_GPA,11); //On Red Led
+       DrvGPIO_ClrBit(E_GPA,10); //Off Green Led
+while (1) {
+stop=0;
+    // Wait for Bluetooth device to be connected
+    while (BtDevice == 0) {
+        DrvSYS_Delay(100000);
+    }
+            while (AcessAdmin == 0) {
+    AcessAdmin = ReadRFIDandDisplay();
+                }
+    if (AcessAdmin == 1) {
+        uartControlledMenu();
+    }
+    if (stop>0) {
+        AcessAdmin = 0;  // Reset access status
+            stop=0;
+    }
+}
+}
+                            </div>
+   <div class="text-center mt-5">
+        <a href="link_to_your_full_code.zip" download>
+            <button class="btn btn-primary">Download Full Code zip Files</button>
+        </a>
+    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-c.min.js"></script>
+    <script>
+        function copyToClipboard(className) {
+            const codeSnippet = document.querySelector(`.${className} pre`);
+            const range = document.createRange();
+            range.selectNode(codeSnippet);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('Code copied to clipboard!');
+        }
+    </script>
+</body>
+
+</html>
+
