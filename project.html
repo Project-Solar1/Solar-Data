@@ -1,7 +1,8 @@
+
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-    <title>about us</title>
+    <title>About Us</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
@@ -17,7 +18,50 @@
         <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <link href="css/ie.css" rel="stylesheet">
     <![endif]-->
-    
+    <style>
+        body {
+
+            color: black;
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            color: darkblue;
+            font-weight: bold;
+            font-size: 32px;
+            text-transform: uppercase;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+        .blockquote {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 5px solid #ccc;
+            margin: 20px 0;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .list2 {
+            list-style: none;
+            padding: 0;
+        }
+        .list2 li {
+            display: inline-block;
+            margin: 10px;
+        }
+        .thumbnail {
+            display: block;
+            width: 200px;
+            height: auto;
+            border: 2px solid darkblue;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
 <!--content wrapper-->
@@ -27,161 +71,144 @@
                 <!--content-->
                 <div class="inner">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-8" style="color: #FFD700; font-size: 20px;">
                             <h2>Project Overview</h2>
-                            <blockquote>
-                                <p>My project introduces a solar system designed for the efficient and straightforward charging of cell phones. It's engineered to automatically adjust the orientation of the solar panel to track the sun's path. This key adjustment is made possible by using four LDR sensors, which determine the best angles for capturing the most sunlight. This allows the solar panel to move and adjust in two different directions.<br><br>
-                                Complementing this system, I have developed an accessible mobile application using MIT App Inventor, which establishes communication through Bluetooth via an HC-05 module. The application features a clear and intuitive menu, enabling users to conduct system diagnostics, customize charging schedules, and access real-time energy data.<br><br>
+                            <div class="blockquote">
+                                <p>My project introduces a solar system designed for the efficient and straightforward charging of cell phones.<br>It's engineered to automatically adjust the orientation of the solar panel to track the sun's path.<br>This key adjustment is made possible by using four LDR sensors, which determine the best angles for capturing the most sunlight.<br> This allows the solar panel to move and adjust in two different directions.<br><br>
+                                Complementing this system, I have developed an accessible mobile application using MIT App Inventor,<br> which establishes communication through Bluetooth via an HC-05 module.<br> The application features a clear and intuitive menu, enabling users to conduct<br> system diagnostics, customize charging schedules, and access real-time energy data.<br><br>
                                 The project is based on the NOVUTON 140 - ARM M0+ microcontroller, programmed with Keil software.
                                 </p>
-                            </blockquote>
+                            </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" style="color: #FFD700;font-size: 20px">
                             <h2>Product Capabilities</h2>
-                            <blockquote>
-                                <p>1. LDR Monitoring: Measures changes in light intensity affecting the LDR component.<br>
-                                   2. SERVO Control: Activates two SERVO motors for two-axis movement.<br>
-                                   3. Current Measurement: Monitors real-time charging current to the phone.<br>
-                                   4. Voltage Measurement: Checks the voltage of the lithium battery providing power.<br>
-                                   5. RFID Security: Enables access via RFID tag scan or app password.<br>
-                                   6. App Interface (MIT App Inventor): Simplifies data reading and sensor testing through a user-friendly app.
+                            <div class="blockquote">
+                                <p>1. LDR Monitoring: Measures changes in light intensity affecting the LDR component.<br><br>
+                                   2. SERVO Control: Activates two SERVO motors for two-axis movement.<br><br>
+                                   3. Current Measurement: Monitors real-time charging current to the phone.<br><br>
+                                   4. Voltage Measurement: Checks the voltage of the lithium battery providing power.<br><br>
+                                   5. RFID Security: Enables access via RFID tag scan or app password.<br><br>
+                                   6. App Interface (MIT App Inventor): Simplifies data reading and sensor testing through a user-friendly app.<br><br>
                                 </p>
-                            </blockquote>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
                         <!-- Additional Labels -->
-                        <div class="col-md-12">
+                        <div class="col-md-12" style="color: #FFD700;font-size: 16px">
+                            <h2>Project Diagram And Explanation</h2>
+                            <img src="img/digram.jpg" alt="" class="img-fluid" style="border: 2px solid darkblue; margin-bottom: 20px;">
+                            <div class="blockquote">
+                                <p>Charge and Discharge Module Integration<br>
+                                • Solar to Battery Charging: The solar panel 5V and 10W connect into the module, which in turn charges a lithium battery 18650.<br>
+                                The charging process is regulated by the module, handling currents up to 1 ampere to ensure the battery charges safely and efficiently.<br>
+                                • Battery to Device Discharging: After the battery is charged, the module then manages the discharge of power from the battery to the connected devices.<br>
+                                It's designed to supply a stream of electricity, allowing for a discharge current ranging from 0.3 to 1 ampere, which is ideal for charging cell phones.<br><br>
 
-                            <h2>Project Diagram And Explain</h2>
-                                                                                                                    <img src="img/digram.jpg" alt="">
-                                                                                                                                                <blockquote>
-                            <p>
+                                UART - HC-05 Bluetooth Module.<br>
+                                • The Bluetooth module handles all communication tasks and is critical for operations.<br> It operates as an interrupt to ensure that communication has high priority through the (GPB0, GPB1).<br><br>
 
-Charge and Discharge Module Integration
-<br>
-• Solar to Battery Charging: The solar panel 5V and 10W conect into the module, which in turn charges a lithium battery 18650.<br>
-The charging process is regulated by the module, handling currents up to 1 ampere to ensure the battery charges safely and efficiently.<br>
-• Battery to Device Discharging: After the battery is charged, the module then manages the discharge of power from the battery to the connected devices.<br>
-It's designed to supply a stream of electricity, allowing for a discharge current ranging from 0.3 to 1 ampere, which is ideal for charging cell phones.<br><br>
+                                SPI - RFID<br>
+                                • The RFID system allows secure access to our application.<br>Users can log in by either using an RFID tag or entering a predefined password ("admin")  connect through the (GPC8, GPC9, GPC,11, GPC 10).<br><br>
 
+                                GPIO - Relay 1, Relay 2, Led 1, Led2.<br>
+                                • Our system includes two relays:<br>
+                                • Relay 1: Triggers to start charging the phone through the GPA 8 pin.<br>
+                                • Relay 2: Connects to the battery for voltage testing through the GPA 9 pin.<br>
+                                • LED indicators show connection status:<br>
+                                • Red LED: Indicates no connection ( GPA 10).<br>
+                                • Green LED: Indicates a successful connection (GPA11).<br>
+                                • A buzzer provides audible feedback during menu navigation, confirming that synchronization between the app and the micro controller.(GPB11).<br><br>
 
+                                ADC - LDR 1-4, ACS712, Voltage.<br>
+                                • Four LDRs are connected to the microcontroller to determine the highest light intensity via ADC, enabling the solar panels to adjust accordingly (GPA1,GPA2,GPA3,GPA4).<br>
+                                • The ACS712 sensor measures current flow through its Hall effect sensor, outputting a voltage proportional to the current. <br>
+                                Two resistors create a voltage divider, which scales the output voltage to a range suitable for the ADC input, ensuring accurate readings (GPA0).<br>
+                                • Voltage Sensor A simple circuit connected to an ADC channel measures the battery voltage. <br>The ADC converts this voltage into a digital value, which is then used to monitor the battery's health and charge level efficiently(GPA6).<br><br>
 
-UART - HC-05 Bluetooth Module.<br>
-• The Bluetooth module handles all communication tasks and is critical for operations.<br> It operates as an interrupt to ensure that communication has high priority through the (GPB0, GPB1).<br><br>
-
-SPI - RFID<br>
-• The RFID system allows secure access to our application.<br>Users can log in by either using an RFID tag or entering a predefined password ("admin")  connect through the (GPC8, GPC9, GPC,11, GPC 10).<br><br>
-
-
-GPIO - Relay 1, Relay 2, Led 1, Led2.<br>
-• Our system includes two relays:<br>
-• Relay 1: Triggers to start charging the phone through the GPA 8 pin.<br>
-• Relay 2: Connects to the battery for voltage testing through the GPA 9 pin.<br>
-• LED indicators show connection status:<br>
-• Red LED: Indicates no connection ( GPA 10).<br>
-• Green LED: Indicates a successful connection (GPA11).<br>
-• A buzzer provides audible feedback during menu navigation, confirming that synchronization between the app and the micro controller.(GPB11).<br><br>
-
-ADC - LDR 1-4, ACS712, Voltage.<br>
-• Four LDRs are connected to the microcontroller to determine the highest light intensity via ADC, enabling the solar panels to adjust accordingly (GPA1,GPA2,GPA3,GPA4).<br>
-• The ACS712 sensor measures current flow through its Hall effect sensor, outputting a voltage proportional to the current. <br>
-Two resistors create a voltage divider, which scales the output voltage to a range suitable for the ADC input, ensuring accurate readings (GPA0).<br>
-• Voltage Sensor A simple circuit connected to an ADC channel measures the battery voltage. <br>The ADC converts this voltage into a digital value, which is then used to monitor the battery's health and charge level efficiently(GPA6).<br><br>
-
-Timer - Servo X axis, Servo Y axis.<br>
-• Two timers control the movement of a servo motor (e.g., SG90):<br>
-• Servo Angle Control: Based on the timing set by the timers, the servo moves to specific angles:100ms: -90 degrees ,150ms: 0 degrees, 200ms: 90 degrees.<br>
-• The position of the servo is adjusted according to the data from the LDRs to optimize the solar panel's orientation for maximum sunlight exposure (GPA11,GPA12).<br>
-• the Servo connected to external battery.                            <blockquote></p>
-
-                            <h2>Code Structure Overview</h2>
-                                                                                                                                                <blockquote>
-                            <p>Code divided into several blocks and functions that allows the use of a short MAIN and the user's affairs in the system capabilities in the form of a "menu" for the sake of understanding and easy access to all parts of the code.</p>
-                                                                                                                                                                            <img src="img/code.jpg" alt="">
-                                                                                                                                                <blockquote>
-                            <h2>Usage - FLOW</h2>
-                                                                                                                                                                                                        <img src="img/flow.jpg" alt="">
-                                                                                                                                                <blockquote>
-                            <h2>application and explain</h2>
+                                Timer - Servo X axis, Servo Y axis.<br>
+                                • Two timers control the movement of a servo motor (e.g., SG90):<br>
+                                • Servo Angle Control: Based on the timing set by the timers, the servo moves to specific angles:100ms: -90 degrees ,150ms: 0 degrees, 200ms: 90 degrees.<br>
+                                • The position of the servo is adjusted according to the data from the LDRs to optimize the solar panel's orientation for maximum sunlight exposure (GPA11,GPA12).<br>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="color:#FFD700;font-size: 20px">
+                            <h2>Application and Explanation</h2>
                             <ul class="list2 row">
                                 <li class="span2"><a href="img/picture1.jpg" class="thumbnail"><img src="img/picture1.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture2.jpg" class="thumbnail"><img src="img/picture2.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture9.jpg" class="thumbnail"><img src="img/picture9.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture3.jpg" class="thumbnail"><img src="img/picture3.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture4.jpg" class="thumbnail"><img src="img/picture4.jpg" alt=""></a></li>
-                                    </ul>
-<p></p><br><br>
+                            </ul>
+                            <br><br>
                             <ul class="list2 row">
                                 <li class="span2"><a href="img/picture5.jpg" class="thumbnail"><img src="img/picture5.jpg" alt=""></a></li>
-                              <li class="span2"><a href="img/picture10.jpg" class="thumbnail"><img src="img/picture10.jpg" alt=""></a></li>
+                                <li class="span2"><a href="img/picture10.jpg" class="thumbnail"><img src="img/picture10.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture6.jpg" class="thumbnail"><img src="img/picture6.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture7.jpg" class="thumbnail"><img src="img/picture7.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture8.jpg" class="thumbnail"><img src="img/picture8.jpg" alt=""></a></li>
-                                    </ul>
-                                       <br>     <br>
-                            <br>                            <br>               <p>
-The images illustrate the complete process of interacting with the application, from connection to charging.
-<br>
-<br>
-1.Connection Sequence: The initial screens show the steps for connecting to the system.<br> This includes scanning for the device and either connecting or disconnecting.
-<br>
-<br>
-2.Login Authentication: Subsequent images depict the login interface, where users are prompted to either scan their RFID card or enter a password, with indicators for successful or failed authentication.
-<br>
-<br>
-3.Main Menu Interaction: Further along, the application presents the main menu, offering various options such as setting the charging duration, accessing battery information, and logging out.
-<br>
-<br>
-4.Charging Initiation and Monitoring: The sequence progresses to initiating the charge, with screens that provide real-time feedback on the charging process, including the amperage, cost, and remaining time.
-<br>
-<br>
-5.Completion and Logout: Finally, the charging completion screen appears with details of the session and logout the user for seciurity.
-<br>
-<br><br>
-This visual flow provides an intuitive guide for users, showcasing the simplicity and functionality of the system from start to finish.
-</p>                
-                    <div>
-                                 <h2>Sensor Checking</h2>
-                                           <ul class="list2 row">
+                            </ul>
+                            <br>     <br><br><br>
+                            <p>The images illustrate the complete process of interacting with the application, from connection to charging.<br><br>
+                            1. Connection Sequence: The initial screens show the steps for connecting to the system. This includes scanning for the device and either connecting or disconnecting.<br><br>
+                            2. Login Authentication: Subsequent images depict the login interface, where users are prompted to either scan their RFID card or enter a password, with indicators for successful or failed authentication.<br><br>
+                            3. Main Menu Interaction: Further along, the application presents the main menu, offering various options such as setting the charging duration, accessing battery information, and logging out.<br><br>
+                            4. Charging Initiation and Monitoring: The sequence progresses to initiating the charge, with screens that provide real-time feedback on the charging process, including the amperage, cost, and remaining time.<br><br>
+                            5. Completion and Logout: Finally, the charging completion screen appears with details of the session and logout the user for security.<br><br>
+                            This visual flow provides an intuitive guide for users, showcasing the simplicity and functionality of the system from start to finish.
+                            </p>                
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="color #FFD700;">
+                            <h2>Sensor Checking</h2>
+                            <ul class="list2 row">
                                 <li class="span2"><a href="img/picture11.jpg" class="thumbnail"><img src="img/picture11.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture12.jpg" class="thumbnail"><img src="img/picture12.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture13.jpg" class="thumbnail"><img src="img/picture13.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture14.jpg" class="thumbnail"><img src="img/picture14.jpg" alt=""></a></li>
                                 <li class="span2"><a href="img/picture15.jpg" class="thumbnail"><img src="img/picture15.jpg" alt=""></a></li>
-                                    </ul>    
-                                                                                                                                                                                    <blockquote>
+                            </ul>
                         </div>
-                                                                                                                                                                                    <blockquote>
-                                                               <h2> A video demonstrating sensor checks via the app.
-</h2>                                                                                                        
-<div class="video-container">
-<video width="800" height="600" controls>
-        <source src="img/example2.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-                                                                                                                                                    <blockquote>      
-</div>
-                                                                                                                                                                                    <blockquote>
-<h2> A video demonstrating servo's activation by LDR.</h2>                                                                                                        
-<div class="video-container">
-<video width="800" height="600" controls>
-
-        <source src="img/example3.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>                                                                                                                                         <blockquote>           
-</div>                                                                                                                                                                                <blockquote>
-<h2> A tutorial video with explain on app navigation and  start charging.</h2>                                                                                                        
-<div class="video-container">
-<video width="800" height="600" controls>
-
-        <source src="img/example1.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <blockquote>                                                                   
-                                                                                                                                                                                                       
-</div>
-                                                                                                                                           
+                    </div>
+                    <br><br>
+                    <br><br>
+                    <div class="row">
+                        <div class="col-md-12" style="color: black;">
+                            <h2>A video demonstrating sensor checks via the app</h2>                                                                                                        
+                            <div class="video-container">
+                                <video width="800" height="600" controls>
+                                    <source src="img/example2.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>      
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="color: black;">
+                            <h2>A video demonstrating servo's activation by LDR</h2>                                                                                                        
+                            <div class="video-container">
+                                <video width="800" height="600" controls>
+                                    <source src="img/example3.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>           
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="color: black;">
+                            <h2>A tutorial video with explanation on app navigation and start charging</h2>                                                                                                        
+                            <div class="video-container">
+                                <video width="800" height="600" controls>
+                                    <source src="img/example1.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>                                                                   
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
